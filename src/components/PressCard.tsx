@@ -48,15 +48,17 @@ function ShareButton({ item }: { item: PressItem }) {
   };
 
   const handleShare = async () => {
-    // Essayer le partage natif (mobile)
+    // Essayer le partage natif (mobile) — nécessite title + url pour déclencher le menu natif
     if (navigator.share) {
       try {
-        await navigator.share({ title: item.title, text: shareText });
+        await navigator.share({
+          title: `Inco-Info — ${item.type}`,
+          text: shareText,
+          url: window.location.origin,
+        });
         return;
       } catch (err: any) {
-        // AbortError = l'utilisateur a annulé, on ne fait rien
         if (err?.name === 'AbortError') return;
-        // Autre erreur → fallback clipboard
       }
     }
     // Fallback : copier dans le presse-papier

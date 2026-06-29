@@ -74,7 +74,7 @@ export default function App() {
         ) : (
           <>
             {page === 'revue' && <RevuePage {...sharedProps} />}
-            {page === 'sources' && <SourcesPage />}
+            {page === 'sources' && <SourcesPage pressItems={pressItems} />}
             {page === 'confrontation' && <ConfrontationPage {...sharedProps} />}
             {page === 'favoris' && <FavorisPage {...sharedProps} />}
             {page === 'sujets' && <SujetsPage pressItems={pressItems} />}

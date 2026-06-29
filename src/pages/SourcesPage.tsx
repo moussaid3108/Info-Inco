@@ -1,4 +1,7 @@
-import { sources, pressItems } from '../data/mockData';
+import { useEffect, useState } from 'react';
+import { sources } from '../data/mockData';
+import { PressItem } from '../types';
+import { fetchSourceCounts } from '../api';
 import clsx from 'clsx';
 
 const biasColors: Record<string, string> = {
@@ -13,11 +16,22 @@ const biasColors: Record<string, string> = {
   'Anti-impérialiste': 'bg-purple-100 text-purple-700',
 };
 
-export default function SourcesPage() {
+interface Props {
+  pressItems: PressItem[];
+}
+
+export default function SourcesPage({ pressItems }: Props) {
+  const [articleCounts, setArticleCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetchSourceCounts().then(setArticleCounts);
+  }, []);
+
   const sourcesWithStats = sources.map(s => {
     const active = pressItems.filter(i => i.sourceIds.includes(s.id)).length;
     const silent = pressItems.filter(i => (i.silentSourceIds || []).includes(s.id)).length;
-    return { ...s, active, silent };
+    const count = articleCounts[s.id] ?? 0;
+    return { ...s, active, silent, articleCount: count };
   }).sort((a, b) => (b.active + b.articleCount) - (a.active + a.articleCount));
 
   return (

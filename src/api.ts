@@ -18,3 +18,13 @@ export async function triggerAnalysis(): Promise<{ itemsGenerated: number }> {
   if (!res.ok) throw new Error('Analysis failed');
   return res.json();
 }
+
+export async function fetchSourceCounts(): Promise<Record<string, number>> {
+  try {
+    const res = await fetch('/api/sources');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  } catch {
+    return {};
+  }
+}

@@ -49,6 +49,21 @@ app.post('/api/refresh', async (_req, res) => {
   }
 });
 
+app.get('/api/sources', (_req, res) => {
+  try {
+    const rows = db.prepare(`
+      SELECT source_id, COUNT(*) as count
+      FROM raw_articles
+      GROUP BY source_id
+    `).all();
+    const counts = {};
+    rows.forEach(r => { counts[r.source_id] = r.count; });
+    res.json(counts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/status', (_req, res) => {
   try {
     const items = getPressItems(1);

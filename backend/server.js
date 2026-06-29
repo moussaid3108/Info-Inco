@@ -19,9 +19,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // --- API ---
 
-app.get('/api/press-items', (_req, res) => {
+app.get('/api/press-items', (req, res) => {
   try {
-    res.json(getPressItems());
+    const date = req.query.date;
+    res.json(getPressItems(100, date || null));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/dates', (_req, res) => {
+  try {
+    const rows = db.prepare(`
+      SELECT DISTINCT date FROM press_items ORDER BY date DESC LIMIT 7
+    `).all();
+    res.json(rows.map(r => r.date));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

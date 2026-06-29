@@ -1,14 +1,25 @@
 import { PressItem } from './types';
 import { pressItems as mockItems } from './data/mockData';
 
-export async function fetchPressItems(): Promise<PressItem[]> {
+export async function fetchPressItems(date?: string): Promise<PressItem[]> {
   try {
-    const res = await fetch('/api/press-items');
+    const url = date ? `/api/press-items?date=${date}` : '/api/press-items';
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data.length > 0 ? data : mockItems;
+    return data.length > 0 ? data : (date ? [] : mockItems);
   } catch {
-    return mockItems;
+    return date ? [] : mockItems;
+  }
+}
+
+export async function fetchAvailableDates(): Promise<string[]> {
+  try {
+    const res = await fetch('/api/dates');
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
   }
 }
 

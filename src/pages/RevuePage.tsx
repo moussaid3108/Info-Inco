@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PressCard from '../components/PressCard';
 import StatsBar from '../components/StatsBar';
 import { AnalysisType, Category, PressItem } from '../types';
@@ -26,9 +27,20 @@ interface Props {
   pressItems: PressItem[];
   favorites: string[];
   onToggleFavorite: (id: string) => void;
+  availableDates: string[];
+  selectedDate: string | null;
+  onSelectDate: (date: string | null) => void;
 }
 
-export default function RevuePage({ pressItems, favorites, onToggleFavorite }: Props) {
+function formatDate(dateStr: string) {
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  if (dateStr === today) return "Aujourd'hui";
+  if (dateStr === yesterday) return 'Hier';
+  return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+
+export default function RevuePage({ pressItems, favorites, onToggleFavorite, availableDates, selectedDate, onSelectDate }: Props) {
   const [typeFilter, setTypeFilter] = useState<AnalysisType | 'Tous'>('Tous');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'Tous'>('Tous');
 
@@ -44,10 +56,53 @@ export default function RevuePage({ pressItems, favorites, onToggleFavorite }: P
     return b.severity - a.severity;
   });
 
+  const currentIdx = selectedDate ? availableDates.indexOf(selectedDate) : -1;
+  const canPrev = currentIdx < availableDates.length - 1;
+  const canNext = currentIdx > 0 || selectedDate !== null;
+
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4">
       <StatsBar pressItems={pressItems} />
 
+      {/* Sélecteur de date */}
+      {availableDates.length > 1 && (
+        <div className="flex items-center justify-between mb-3 bg-white rounded-xl border border-gray-100 shadow-sm px-3 py-2">
+          <button
+            onClick={() => onSelectDate(canPrev ? availableDates[currentIdx + 1] : null)}
+            disabled={!canPrev}
+            className="p-1 rounded-lg disabled:opacity-30 hover:bg-gray-100 transition-colors"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+            {availableDates.map(d => (
+              <button
+                key={d}
+                onClick={() => onSelectDate(d === selectedDate ? null : d)}
+                className={clsx(
+                  'px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
+                  (selectedDate === d || (!selectedDate && d === availableDates[0]))
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-500 hover:bg-gray-100'
+                )}
+              >
+                {formatDate(d)}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => onSelectDate(canNext ? (currentIdx > 0 ? availableDates[currentIdx - 1] : null) : null)}
+            disabled={!canNext}
+            className="p-1 rounded-lg disabled:opacity-30 hover:bg-gray-100 transition-colors"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Filtres type */}
       <div className="flex flex-wrap gap-2 mb-3">
         {typeFilters.map(f => (
           <button
@@ -65,6 +120,7 @@ export default function RevuePage({ pressItems, favorites, onToggleFavorite }: P
         ))}
       </div>
 
+      {/* Filtres catégorie */}
       <div className="flex flex-wrap gap-2 mb-4">
         {categoryFilters.map(f => (
           <button

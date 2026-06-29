@@ -145,12 +145,12 @@ export async function analyzeArticles({ forceRefresh = false } = {}) {
   }
 }
 
-export function getPressItems(limit = 100) {
-  return db.prepare(`
-    SELECT * FROM press_items
-    ORDER BY is_priority DESC, severity DESC, date DESC
-    LIMIT ?
-  `).all(limit).map(row => ({
+export function getPressItems(limit = 100, date = null) {
+  const query = date
+    ? `SELECT * FROM press_items WHERE date = ? ORDER BY is_priority DESC, severity DESC LIMIT ?`
+    : `SELECT * FROM press_items ORDER BY is_priority DESC, severity DESC, date DESC LIMIT ?`;
+  const params = date ? [date, limit] : [limit];
+  return db.prepare(query).all(...params).map(row => ({
     id: row.id,
     type: row.type,
     category: row.category,

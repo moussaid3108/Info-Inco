@@ -8,7 +8,7 @@ import FavorisPage from './pages/FavorisPage';
 import SujetsPage from './pages/SujetsPage';
 import AboutPage from './pages/AboutPage';
 import { Page, PressItem } from './types';
-import { fetchPressItems, triggerAnalysis } from './api';
+import { fetchPressItems, triggerAnalysis, fetchAvailableDates } from './api';
 
 export default function App() {
   const [page, setPage] = useState<Page>('revue');
@@ -18,19 +18,28 @@ export default function App() {
   });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [pressItems, setPressItems] = useState<PressItem[]>([]);
-  const [revueKey, setRevueKey] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [revueKey, setRevueKey] = useState(0);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('inco-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  // Charger les dates disponibles au démarrage
   useEffect(() => {
-    fetchPressItems().then(items => {
+    fetchAvailableDates().then(setAvailableDates);
+  }, []);
+
+  // Recharger les articles quand la date change
+  useEffect(() => {
+    setLoading(true);
+    fetchPressItems(selectedDate ?? undefined).then(items => {
       setPressItems(items);
       setLoading(false);
     });
-  }, []);
+  }, [selectedDate]);
 
   const toggleFavorite = (id: string) => {
     setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
@@ -40,8 +49,13 @@ export default function App() {
     setIsAnalyzing(true);
     try {
       await triggerAnalysis();
-      const items = await fetchPressItems();
+      const [items, dates] = await Promise.all([
+        fetchPressItems(),
+        fetchAvailableDates(),
+      ]);
       setPressItems(items);
+      setAvailableDates(dates);
+      setSelectedDate(null);
     } catch (err) {
       console.error('Analysis error:', err);
     } finally {
@@ -49,8 +63,12 @@ export default function App() {
     }
   };
 
+  const handleSelectDate = (date: string | null) => {
+    setSelectedDate(date);
+  };
+
   const navigate = (p: Page) => { setPage(p); setSidebarOpen(false); };
-  const goHome = () => { setPage('revue'); setSidebarOpen(false); setRevueKey(k => k + 1); };
+  const goHome = () => { setPage('revue'); setSidebarOpen(false); setSelectedDate(null); setRevueKey(k => k + 1); };
   const sharedProps = { pressItems, favorites, onToggleFavorite: toggleFavorite };
 
   return (
@@ -76,7 +94,15 @@ export default function App() {
           </div>
         ) : (
           <>
-            {page === 'revue' && <RevuePage key={revueKey} {...sharedProps} />}
+            {page === 'revue' && (
+              <RevuePage
+                key={revueKey}
+                {...sharedProps}
+                availableDates={availableDates}
+                selectedDate={selectedDate}
+                onSelectDate={handleSelectDate}
+              />
+            )}
             {page === 'sources' && <SourcesPage pressItems={pressItems} />}
             {page === 'confrontation' && <ConfrontationPage {...sharedProps} />}
             {page === 'favoris' && <FavorisPage {...sharedProps} />}

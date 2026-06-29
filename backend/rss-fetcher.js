@@ -84,8 +84,20 @@ export function getUnprocessedArticles(limit = 80) {
   `).all(limit);
 }
 
+export function getRecentArticles(limit = 120) {
+  return db.prepare(`
+    SELECT * FROM raw_articles
+    ORDER BY pub_date DESC
+    LIMIT ?
+  `).all(limit);
+}
+
 export function markProcessed(ids) {
   if (!ids.length) return;
   const ph = ids.map(() => '?').join(',');
   db.prepare(`UPDATE raw_articles SET processed = 1 WHERE id IN (${ph})`).run(...ids);
+}
+
+export function resetAllProcessed() {
+  db.prepare(`UPDATE raw_articles SET processed = 0`).run();
 }

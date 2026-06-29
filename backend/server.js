@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { getPressItems } from './analyzer.js';
 import { startScheduler, runNow } from './scheduler.js';
+import { resetAllProcessed } from './rss-fetcher.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -29,6 +30,8 @@ app.get('/api/press-items', (_req, res) => {
 
 app.post('/api/analyze', async (_req, res) => {
   try {
+    // Reset processed flag so all recent articles are re-analyzed fresh
+    resetAllProcessed();
     const result = await runNow();
     res.json({ success: true, ...result });
   } catch (err) {
@@ -59,7 +62,7 @@ app.listen(PORT, () => {
   startScheduler();
   // First run if DB is empty
   const items = getPressItems(1);
-  if (items.length === 0 && process.env.DEEPSEEK_API_KEY) {
+  if (items.length === 0 && process.env.OPENAI_API_KEY) {
     console.log('[Server] No data yet — launching initial analysis...');
     runNow().catch(console.error);
   }

@@ -14,8 +14,9 @@ const typeFilters: { value: AnalysisType | 'Tous'; label: string }[] = [
 
 const categoryFilters: { value: Category | 'Tous'; label: string }[] = [
   { value: 'Tous', label: 'Tous' },
-  { value: 'Géopolitique', label: 'Géopolitique' },
+  { value: 'Guerre', label: '⚔️ Guerre' },
   { value: 'Économie', label: 'Économie' },
+  { value: 'Géopolitique', label: 'Géopolitique' },
   { value: 'Société', label: 'Société' },
   { value: 'Climat', label: 'Climat' },
   { value: 'Justice', label: 'Justice' },

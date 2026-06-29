@@ -1,5 +1,5 @@
 export type AnalysisType = 'OMISSION' | 'DIVERGENCE' | 'INCOHÉRENCE' | 'SILENCE';
-export type Category = 'Géopolitique' | 'Économie' | 'Société' | 'Climat' | 'Justice';
+export type Category = 'Géopolitique' | 'Économie' | 'Société' | 'Climat' | 'Justice' | 'Guerre';
 export type Page = 'revue' | 'sources' | 'confrontation' | 'favoris' | 'sujets' | 'apropos';
 
 export interface MediaSource {

@@ -4,8 +4,7 @@ import db from './database.js';
 import { randomUUID } from 'crypto';
 
 const client = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const SOURCE_NAMES = {
@@ -57,7 +56,7 @@ export async function analyzeArticles() {
 
   try {
     const response = await client.chat.completions.create({
-      model: 'deepseek-chat',
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         {

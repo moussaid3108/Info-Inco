@@ -32,7 +32,7 @@ export default function PressCard({ item, isFavorite, onToggleFavorite }: Props)
   const activeSources = sources.filter(s => item.sourceIds.includes(s.id));
   const silentSources = sources.filter(s => (item.silentSourceIds || []).includes(s.id));
 
-  const daysAgo = Math.ceil((new Date('2026-06-06').getTime() - new Date(item.date).getTime()) / 86400000);
+  const daysAgo = Math.floor((Date.now() - new Date(item.date).getTime()) / 86400000);
 
   return (
     <article className={clsx(

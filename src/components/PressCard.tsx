@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Star, ChevronDown, ChevronUp, AlertTriangle, Share2, Check } from 'lucide-react';
 import { PressItem, AnalysisType } from '../types';
 import { sources } from '../data/mockData';
 import TypeBadge from './TypeBadge';
@@ -25,6 +25,34 @@ const bgColors: Record<AnalysisType, string> = {
   'INCOHÉRENCE': 'bg-violet-50',
   SILENCE: 'bg-gray-50',
 };
+
+function ShareButton({ item }: { item: PressItem }) {
+  const [copied, setCopied] = useState(false);
+
+  const shareText = `🔍 Inco-Info — ${item.type}\n\n${item.title}\n\n${item.summary}\n\nvia inco-info.fr`;
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: item.title, text: shareText });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleShare}
+      className="p-1.5 rounded-full text-gray-300 hover:text-gray-500 transition-all flex-shrink-0"
+      title="Partager"
+    >
+      {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
+    </button>
+  );
+}
 
 export default function PressCard({ item, isFavorite, onToggleFavorite }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -58,15 +86,18 @@ export default function PressCard({ item, isFavorite, onToggleFavorite }: Props)
             <span className="text-xs text-gray-400 font-medium">{dateLabel}</span>
             <SeverityDots level={item.severity} />
           </div>
-          <button
-            onClick={() => onToggleFavorite(item.id)}
-            className={clsx(
-              'p-1.5 rounded-full transition-all flex-shrink-0',
-              isFavorite ? 'text-amber-500' : 'text-gray-300 hover:text-gray-500'
-            )}
-          >
-            <Star size={18} fill={isFavorite ? 'currentColor' : 'none'} />
-          </button>
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+            <ShareButton item={item} />
+            <button
+              onClick={() => onToggleFavorite(item.id)}
+              className={clsx(
+                'p-1.5 rounded-full transition-all',
+                isFavorite ? 'text-amber-500' : 'text-gray-300 hover:text-gray-500'
+              )}
+            >
+              <Star size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 mb-2 flex-wrap">

@@ -13,8 +13,8 @@ export const RSS_SOURCES = [
   { id: 'liberation', name: 'Libération',     url: 'https://www.liberation.fr/arc/outboundfeeds/rss/' },
   { id: 'bbc',        name: 'BBC News',       url: 'https://feeds.bbci.co.uk/news/world/rss.xml' },
   { id: 'aljazeera',  name: 'Al Jazeera',    url: 'https://www.aljazeera.com/xml/rss/all.xml' },
-  { id: 'reuters',    name: 'Reuters',        url: 'https://feeds.reuters.com/reuters/topNews' },
-  { id: 'cnbc',       name: 'CNBC',           url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html' },
+  { id: 'reuters',    name: 'Reuters',        url: 'https://feeds.reuters.com/reuters/worldNews' },
+  { id: 'nyt',        name: 'New York Times', url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml' },
   { id: 'radiocanada',name: 'Radio-Canada',   url: 'https://ici.radio-canada.ca/rss/4201' },
   { id: 'ft',         name: 'Financial Times', url: 'https://www.ft.com/rss/home/uk' },
 ];

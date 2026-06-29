@@ -33,6 +33,11 @@ export default function PressCard({ item, isFavorite, onToggleFavorite }: Props)
   const silentSources = sources.filter(s => (item.silentSourceIds || []).includes(s.id));
 
   const daysAgo = Math.floor((Date.now() - new Date(item.date).getTime()) / 86400000);
+  const dateLabel = daysAgo === 0
+    ? "Aujourd'hui"
+    : daysAgo === 1
+    ? 'Hier'
+    : new Date(item.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <article className={clsx(
@@ -50,9 +55,7 @@ export default function PressCard({ item, isFavorite, onToggleFavorite }: Props)
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
             <TypeBadge type={item.type} />
-            <span className="text-xs text-gray-400 font-medium">
-              {daysAgo === 0 ? "Aujourd'hui" : daysAgo === 1 ? 'Il y a 1 jour' : `Il y a ${daysAgo} jours`}
-            </span>
+            <span className="text-xs text-gray-400 font-medium">{dateLabel}</span>
             <SeverityDots level={item.severity} />
           </div>
           <button

@@ -35,6 +35,16 @@ function hasAnalysisToday() {
   return row.cnt > 0;
 }
 
+function deleteOldPressItems(daysToKeep = 7) {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - daysToKeep);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const result = db.prepare(`DELETE FROM press_items WHERE date < ?`).run(cutoffStr);
+  if (result.changes > 0) {
+    console.log(`[Analyzer] Deleted ${result.changes} press items older than ${daysToKeep} days`);
+  }
+}
+
 function insertAnalyses(analyses) {
   const insert = db.prepare(`
     INSERT OR IGNORE INTO press_items
@@ -67,6 +77,9 @@ export async function analyzeArticles({ forceRefresh = false } = {}) {
     console.log('[Analyzer] Already analyzed today — skipping API call');
     return [];
   }
+
+  // Purge les analyses de plus de 7 jours
+  deleteOldPressItems(7);
 
   // Use unprocessed articles first, fall back to recent 48h
   let articles = getUnprocessedArticles(100);

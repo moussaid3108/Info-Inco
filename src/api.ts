@@ -13,7 +13,8 @@ export async function fetchPressItems(): Promise<PressItem[]> {
 }
 
 export async function triggerAnalysis(): Promise<{ itemsGenerated: number }> {
-  const res = await fetch('/api/analyze', { method: 'POST' });
+  // /api/refresh : purge les anciens articles + force une nouvelle analyse
+  const res = await fetch('/api/refresh', { method: 'POST' });
   if (!res.ok) throw new Error('Analysis failed');
   return res.json();
 }

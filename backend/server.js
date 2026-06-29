@@ -3,7 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getPressItems } from './analyzer.js';
+import { getPressItems, analyzeArticles } from './analyzer.js';
+import db from './database.js';
 import { startScheduler, runNow } from './scheduler.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,6 +32,17 @@ app.post('/api/analyze', async (req, res) => {
     // forceRefresh=true uniquement si explicitement demandé (admin)
     const forceRefresh = req.body?.forceRefresh === true;
     const result = await runNow({ forceRefresh });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Nettoie les anciennes entrées et force une nouvelle analyse
+app.post('/api/refresh', async (_req, res) => {
+  try {
+    db.prepare(`DELETE FROM press_items WHERE date < date('now', '-7 days')`).run();
+    const result = await runNow({ forceRefresh: true });
     res.json({ success: true, ...result });
   } catch (err) {
     res.status(500).json({ error: err.message });

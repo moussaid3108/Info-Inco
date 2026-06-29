@@ -1,18 +1,25 @@
 import { MediaSource, PressItem } from '../types';
 
 export const sources: MediaSource[] = [
-  { id: 'lemonde', name: 'Le Monde', country: 'France', flag: '🇫🇷', bias: 'Centre-gauche', articleCount: 24, color: '#1a56db' },
-  { id: 'lefigaro', name: 'Le Figaro', country: 'France', flag: '🇫🇷', bias: 'Centre-droite', articleCount: 18, color: '#dc2626' },
-  { id: 'liberation', name: 'Libération', country: 'France', flag: '🇫🇷', bias: 'Gauche', articleCount: 15, color: '#e05252' },
-  { id: 'cnbc', name: 'CNBC', country: 'États-Unis', flag: '🇺🇸', bias: 'Centre', articleCount: 31, color: '#059669' },
-  { id: 'bbc', name: 'BBC News', country: 'Royaume-Uni', flag: '🇬🇧', bias: 'Centre', articleCount: 27, color: '#bb0000' },
-  { id: 'aljazeera', name: 'Al Jazeera', country: 'Qatar', flag: '🇶🇦', bias: 'Centre (Sud global)', articleCount: 22, color: '#b45309' },
-  { id: 'reuters', name: 'Reuters', country: 'Royaume-Uni', flag: '🇬🇧', bias: 'Centre / Agence', articleCount: 45, color: '#f97316' },
-  { id: 'ft', name: 'Financial Times', country: 'Royaume-Uni', flag: '🇬🇧', bias: 'Centre-droite libéral', articleCount: 19, color: '#ef4444' },
-  { id: 'cnn', name: 'CNN', country: 'États-Unis', flag: '🇺🇸', bias: 'Centre-gauche', articleCount: 28, color: '#cc0001' },
-  { id: 'thecradle', name: 'The Cradle', country: 'Liban', flag: '🇱🇧', bias: 'Anti-impérialiste', articleCount: 8, color: '#7c3aed' },
-  { id: 'radiocanada', name: 'Radio-Canada', country: 'Canada', flag: '🇨🇦', bias: 'Centre / Public', articleCount: 12, color: '#dc2626' },
-  { id: 'nyt', name: 'New York Times', country: 'États-Unis', flag: '🇺🇸', bias: 'Centre-gauche', articleCount: 33, color: '#1f2937' },
+  // Presse française
+  { id: 'lemonde',    name: 'Le Monde',        country: 'France',        flag: '🇫🇷', bias: 'Centre-gauche',       articleCount: 0, color: '#1a56db' },
+  { id: 'lefigaro',  name: 'Le Figaro',        country: 'France',        flag: '🇫🇷', bias: 'Centre-droite',       articleCount: 0, color: '#dc2626' },
+  { id: 'liberation',name: 'Libération',       country: 'France',        flag: '🇫🇷', bias: 'Gauche',              articleCount: 0, color: '#e05252' },
+  { id: 'france24',  name: 'France 24',        country: 'France',        flag: '🇫🇷', bias: 'Centre / Public',     articleCount: 0, color: '#003f8a' },
+  { id: 'rfi',       name: 'RFI',              country: 'France',        flag: '🇫🇷', bias: 'Centre / Public',     articleCount: 0, color: '#e3000f' },
+  { id: 'mediapart', name: 'Mediapart',        country: 'France',        flag: '🇫🇷', bias: 'Gauche / Investigation', articleCount: 0, color: '#000000' },
+  // Presse anglophone
+  { id: 'bbc',       name: 'BBC News',         country: 'Royaume-Uni',   flag: '🇬🇧', bias: 'Centre',              articleCount: 0, color: '#bb0000' },
+  { id: 'guardian',  name: 'The Guardian',     country: 'Royaume-Uni',   flag: '🇬🇧', bias: 'Centre-gauche',       articleCount: 0, color: '#052962' },
+  { id: 'ft',        name: 'Financial Times',  country: 'Royaume-Uni',   flag: '🇬🇧', bias: 'Centre-droite libéral', articleCount: 0, color: '#ef4444' },
+  { id: 'reuters',   name: 'Reuters',          country: 'Royaume-Uni',   flag: '🇬🇧', bias: 'Centre / Agence',     articleCount: 0, color: '#f97316' },
+  { id: 'nyt',       name: 'New York Times',   country: 'États-Unis',    flag: '🇺🇸', bias: 'Centre-gauche',       articleCount: 0, color: '#1f2937' },
+  { id: 'foxnews',   name: 'Fox News',         country: 'États-Unis',    flag: '🇺🇸', bias: 'Droite',              articleCount: 0, color: '#003366' },
+  // Presse internationale
+  { id: 'aljazeera', name: 'Al Jazeera',       country: 'Qatar',         flag: '🇶🇦', bias: 'Centre (Sud global)', articleCount: 0, color: '#b45309' },
+  { id: 'dw',        name: 'Deutsche Welle',   country: 'Allemagne',     flag: '🇩🇪', bias: 'Centre / Public',     articleCount: 0, color: '#000000' },
+  { id: 'haaretz',   name: 'Haaretz',          country: 'Israël',        flag: '🇮🇱', bias: 'Centre-gauche',       articleCount: 0, color: '#00539f' },
+  { id: 'radiocanada',name: 'Radio-Canada',    country: 'Canada',        flag: '🇨🇦', bias: 'Centre / Public',     articleCount: 0, color: '#dc2626' },
 ];
 
 export const pressItems: PressItem[] = [

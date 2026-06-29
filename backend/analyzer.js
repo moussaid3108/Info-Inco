@@ -9,8 +9,11 @@ const client = new OpenAI({
 
 const SOURCE_NAMES = {
   lemonde: 'Le Monde', lefigaro: 'Le Figaro', liberation: 'Libération',
-  bbc: 'BBC News', aljazeera: 'Al Jazeera', reuters: 'Reuters',
-  cnbc: 'CNBC', radiocanada: 'Radio-Canada', ft: 'Financial Times',
+  bbc: 'BBC News', guardian: 'The Guardian', nyt: 'New York Times',
+  foxnews: 'Fox News', ft: 'Financial Times', reuters: 'Reuters',
+  aljazeera: 'Al Jazeera', dw: 'Deutsche Welle', haaretz: 'Haaretz',
+  france24: 'France 24', rfi: 'RFI', mediapart: 'Mediapart',
+  radiocanada: 'Radio-Canada',
 };
 
 const SYSTEM_PROMPT = `Tu es un analyste critique expert en biais médiatiques et en analyse comparative de la presse internationale.

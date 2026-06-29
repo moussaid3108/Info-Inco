@@ -8,15 +8,25 @@ const parser = new Parser({
 });
 
 export const RSS_SOURCES = [
-  { id: 'lemonde',     name: 'Le Monde',      url: 'https://www.lemonde.fr/rss/une.xml' },
-  { id: 'lefigaro',   name: 'Le Figaro',      url: 'https://www.lefigaro.fr/rss/figaro_actualites.xml' },
-  { id: 'liberation', name: 'Libération',     url: 'https://www.liberation.fr/arc/outboundfeeds/rss/' },
-  { id: 'bbc',        name: 'BBC News',       url: 'https://feeds.bbci.co.uk/news/world/rss.xml' },
-  { id: 'aljazeera',  name: 'Al Jazeera',    url: 'https://www.aljazeera.com/xml/rss/all.xml' },
-  { id: 'reuters',    name: 'Reuters',        url: 'https://feeds.reuters.com/reuters/worldNews' },
-  { id: 'nyt',        name: 'New York Times', url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml' },
-  { id: 'radiocanada',name: 'Radio-Canada',   url: 'https://ici.radio-canada.ca/rss/4201' },
-  { id: 'ft',         name: 'Financial Times', url: 'https://www.ft.com/rss/home/uk' },
+  // Presse française
+  { id: 'lemonde',     name: 'Le Monde',        url: 'https://www.lemonde.fr/rss/une.xml' },
+  { id: 'lefigaro',   name: 'Le Figaro',        url: 'https://www.lefigaro.fr/rss/figaro_actualites.xml' },
+  { id: 'liberation', name: 'Libération',       url: 'https://www.liberation.fr/arc/outboundfeeds/rss/' },
+  { id: 'france24',   name: 'France 24',        url: 'https://www.france24.com/fr/rss' },
+  { id: 'rfi',        name: 'RFI',              url: 'https://www.rfi.fr/fr/rss' },
+  { id: 'mediapart',  name: 'Mediapart',        url: 'https://www.mediapart.fr/articles/feed' },
+  // Presse anglophone
+  { id: 'bbc',        name: 'BBC News',         url: 'https://feeds.bbci.co.uk/news/world/rss.xml' },
+  { id: 'guardian',   name: 'The Guardian',     url: 'https://www.theguardian.com/world/rss' },
+  { id: 'nyt',        name: 'New York Times',   url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml' },
+  { id: 'foxnews',    name: 'Fox News',         url: 'https://feeds.foxnews.com/foxnews/world' },
+  { id: 'ft',         name: 'Financial Times',  url: 'https://www.ft.com/rss/home/uk' },
+  { id: 'reuters',    name: 'Reuters',          url: 'https://feeds.reuters.com/reuters/worldNews' },
+  // Presse internationale
+  { id: 'aljazeera',  name: 'Al Jazeera',      url: 'https://www.aljazeera.com/xml/rss/all.xml' },
+  { id: 'dw',         name: 'Deutsche Welle',   url: 'https://rss.dw.com/rdf/rss-en-all' },
+  { id: 'haaretz',    name: 'Haaretz',          url: 'https://www.haaretz.com/srv/haaretz-feed-world-news.rss' },
+  { id: 'radiocanada',name: 'Radio-Canada',     url: 'https://ici.radio-canada.ca/rss/4201' },
 ];
 
 function fingerprint(sourceId, title) {

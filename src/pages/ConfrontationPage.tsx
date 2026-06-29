@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { pressItems, sources } from '../data/mockData';
+import { sources } from '../data/mockData';
 import { PressItem, AnalysisType } from '../types';
 import TypeBadge from '../components/TypeBadge';
 import { Star, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 
 interface Props {
+  pressItems: PressItem[];
   favorites: string[];
   onToggleFavorite: (id: string) => void;
 }
@@ -60,9 +61,7 @@ function ConfrontationCard({ item, isFavorite, onToggleFavorite }: {
 
       {item.sourceQuotes && item.sourceQuotes.length > 0 && (
         <div className="p-4 space-y-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-            Comparer les positions
-          </p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Comparer les positions</p>
           {item.sourceQuotes.map((q, i) => {
             const src = sources.find(s => s.id === q.sourceId);
             const isSelected = selected === String(i);
@@ -72,14 +71,12 @@ function ConfrontationCard({ item, isFavorite, onToggleFavorite }: {
                 onClick={() => setSelected(isSelected ? null : String(i))}
                 className={clsx(
                   'w-full text-left rounded-xl border p-3 transition-all',
-                  isSelected
-                    ? `${borderColors[item.type]} border-2`
-                    : 'border-gray-100 hover:border-gray-300'
+                  isSelected ? `${borderColors[item.type]} border-2` : 'border-gray-100 hover:border-gray-300'
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className={clsx('text-xs font-bold px-2 py-0.5 rounded-md', tagColors[q.sourceId] || 'bg-gray-100 text-gray-700')}>
-                    {src?.flag} {src?.name}
+                    {src?.flag} {src?.name || q.sourceId}
                   </span>
                   <ChevronRight size={14} className={clsx('text-gray-400 transition-transform', isSelected && 'rotate-90')} />
                 </div>
@@ -126,7 +123,7 @@ function ConfrontationCard({ item, isFavorite, onToggleFavorite }: {
   );
 }
 
-export default function ConfrontationPage({ favorites, onToggleFavorite }: Props) {
+export default function ConfrontationPage({ pressItems, favorites, onToggleFavorite }: Props) {
   const withContent = pressItems.filter(i =>
     (i.sourceQuotes && i.sourceQuotes.length > 0) || (i.silentSourceIds && i.silentSourceIds.length > 0)
   );
@@ -146,6 +143,9 @@ export default function ConfrontationPage({ favorites, onToggleFavorite }: Props
             onToggleFavorite={onToggleFavorite}
           />
         ))}
+        {withContent.length === 0 && (
+          <p className="text-center py-12 text-gray-400 text-sm">Aucune confrontation disponible pour le moment.</p>
+        )}
       </div>
     </div>
   );

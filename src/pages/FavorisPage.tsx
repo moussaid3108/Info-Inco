@@ -1,13 +1,14 @@
-import { pressItems } from '../data/mockData';
+import { PressItem } from '../types';
 import PressCard from '../components/PressCard';
 import { Star } from 'lucide-react';
 
 interface Props {
+  pressItems: PressItem[];
   favorites: string[];
   onToggleFavorite: (id: string) => void;
 }
 
-export default function FavorisPage({ favorites, onToggleFavorite }: Props) {
+export default function FavorisPage({ pressItems, favorites, onToggleFavorite }: Props) {
   const favItems = pressItems.filter(i => favorites.includes(i.id));
 
   return (
@@ -27,12 +28,7 @@ export default function FavorisPage({ favorites, onToggleFavorite }: Props) {
       ) : (
         <div className="space-y-3">
           {favItems.map(item => (
-            <PressCard
-              key={item.id}
-              item={item}
-              isFavorite={true}
-              onToggleFavorite={onToggleFavorite}
-            />
+            <PressCard key={item.id} item={item} isFavorite={true} onToggleFavorite={onToggleFavorite} />
           ))}
         </div>
       )}

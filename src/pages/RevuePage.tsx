@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { pressItems } from '../data/mockData';
 import PressCard from '../components/PressCard';
 import StatsBar from '../components/StatsBar';
-import { AnalysisType, Category } from '../types';
+import { AnalysisType, Category, PressItem } from '../types';
 import clsx from 'clsx';
 
 const typeFilters: { value: AnalysisType | 'Tous'; label: string }[] = [
@@ -23,11 +22,12 @@ const categoryFilters: { value: Category | 'Tous'; label: string }[] = [
 ];
 
 interface Props {
+  pressItems: PressItem[];
   favorites: string[];
   onToggleFavorite: (id: string) => void;
 }
 
-export default function RevuePage({ favorites, onToggleFavorite }: Props) {
+export default function RevuePage({ pressItems, favorites, onToggleFavorite }: Props) {
   const [typeFilter, setTypeFilter] = useState<AnalysisType | 'Tous'>('Tous');
   const [categoryFilter, setCategoryFilter] = useState<Category | 'Tous'>('Tous');
 
@@ -37,7 +37,7 @@ export default function RevuePage({ favorites, onToggleFavorite }: Props) {
     return typeOk && catOk;
   });
 
-  const priorityFirst = [...filtered].sort((a, b) => {
+  const sorted = [...filtered].sort((a, b) => {
     if (a.isPriority && !b.isPriority) return -1;
     if (!a.isPriority && b.isPriority) return 1;
     return b.severity - a.severity;
@@ -45,7 +45,7 @@ export default function RevuePage({ favorites, onToggleFavorite }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-4">
-      <StatsBar />
+      <StatsBar pressItems={pressItems} />
 
       <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 mb-3">
         <div className="flex gap-2 w-max">
@@ -85,14 +85,14 @@ export default function RevuePage({ favorites, onToggleFavorite }: Props) {
         </div>
       </div>
 
-      {priorityFirst.length === 0 ? (
+      {sorted.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <p className="text-lg font-semibold">Aucun résultat</p>
-          <p className="text-sm mt-1">Modifiez vos filtres pour voir plus d'analyses.</p>
+          <p className="text-sm mt-1">Modifiez vos filtres ou lancez une analyse.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {priorityFirst.map(item => (
+          {sorted.map(item => (
             <PressCard
               key={item.id}
               item={item}
@@ -104,7 +104,7 @@ export default function RevuePage({ favorites, onToggleFavorite }: Props) {
       )}
 
       <p className="text-center text-xs text-gray-400 mt-6">
-        Analyse du 6 juin 2026 · {pressItems.length} items dans le corpus
+        {pressItems.length} analyse{pressItems.length !== 1 ? 's' : ''} dans le corpus
       </p>
     </div>
   );

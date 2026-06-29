@@ -1,6 +1,8 @@
-import { pressItems } from '../data/mockData';
+import { PressItem } from '../types';
 
-export default function StatsBar() {
+interface Props { pressItems: PressItem[]; }
+
+export default function StatsBar({ pressItems }: Props) {
   const counts = {
     OMISSION: pressItems.filter(i => i.type === 'OMISSION').length,
     DIVERGENCE: pressItems.filter(i => i.type === 'DIVERGENCE').length,

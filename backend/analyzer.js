@@ -22,10 +22,12 @@ const SYSTEM_PROMPT = `Tu es un analyste expert en biais médiatiques. Analyse l
 - INCOHÉRENCE : une source se contredit dans ses propres articles
 - SILENCE : sujet important ignoré par la quasi-totalité des sources
 
+IMPORTANT : Toutes tes réponses doivent être ENTIÈREMENT EN FRANÇAIS, y compris les citations de sources anglophones (BBC, Guardian, NYT, etc.) que tu dois traduire en français. Ne laisse aucun mot en anglais dans le JSON.
+
 Retourne UNIQUEMENT un tableau JSON valide (sans markdown) de 10 à 12 analyses couvrant les 4 types et plusieurs catégories.
 
 Structure de chaque analyse :
-{"type":"OMISSION"|"DIVERGENCE"|"INCOHÉRENCE"|"SILENCE","category":"Géopolitique"|"Économie"|"Société"|"Climat"|"Justice","title":"max 15 mots","summary":"2-3 phrases","detail":"4-5 phrases avec exemples précis","sourceIds":["id"],"silentSourceIds":["id"],"severity":1|2|3,"isPriority":true|false,"sourceQuotes":[{"sourceId":"id","quote":"citation"}]}`;
+{"type":"OMISSION"|"DIVERGENCE"|"INCOHÉRENCE"|"SILENCE","category":"Géopolitique"|"Économie"|"Société"|"Climat"|"Justice","title":"max 15 mots en français","summary":"2-3 phrases en français","detail":"4-5 phrases en français avec exemples précis","sourceIds":["id"],"silentSourceIds":["id"],"severity":1|2|3,"isPriority":true|false,"sourceQuotes":[{"sourceId":"id","quote":"citation traduite en français"}]}`;
 
 function hasAnalysisToday() {
   const today = new Date().toISOString().split('T')[0];

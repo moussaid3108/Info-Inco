@@ -1,9 +1,9 @@
 import { PressItem, Category } from '../types';
 import TypeBadge from '../components/TypeBadge';
 
-const categories: Category[] = ['Géopolitique', 'Économie', 'Société', 'Climat', 'Justice'];
+const categories: Category[] = ['Guerre', 'Économie', 'Géopolitique', 'Société', 'Climat', 'Justice'];
 const categoryIcons: Record<Category, string> = {
-  Géopolitique: '🌍', Économie: '📈', Société: '🏙️', Climat: '🌿', Justice: '⚖️',
+  Guerre: '⚔️', Géopolitique: '🌍', Économie: '📈', Société: '🏙️', Climat: '🌿', Justice: '⚖️',
 };
 
 interface Props { pressItems: PressItem[]; }

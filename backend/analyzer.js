@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { getUnprocessedArticles, getRecentArticles } from './rss-fetcher.js';
+import { getUnprocessedArticles, getRecentArticles, markProcessed } from './rss-fetcher.js';
 import db from './database.js';
 import { randomUUID } from 'crypto';
 
@@ -16,68 +16,21 @@ const SOURCE_NAMES = {
   radiocanada: 'Radio-Canada',
 };
 
-const BASE_SCHEMA = `Chaque analyse doit respecter cette structure exacte :
-{
-  "type": "OMISSION" | "DIVERGENCE" | "INCOHÉRENCE" | "SILENCE",
-  "category": "Géopolitique" | "Économie" | "Société" | "Climat" | "Justice",
-  "title": "Titre court et percutant (max 15 mots)",
-  "summary": "Résumé en 2-3 phrases expliquant le problème détecté",
-  "detail": "Analyse approfondie en 4-6 phrases avec exemples précis tirés des articles",
-  "sourceIds": ["id_source1", "id_source2"],
-  "silentSourceIds": ["id_source3"],
-  "severity": 1 | 2 | 3,
-  "isPriority": true | false,
-  "sourceQuotes": [
-    { "sourceId": "id_source1", "quote": "Citation ou paraphrase précise de l'article" }
-  ]
-}`;
+const SYSTEM_PROMPT = `Tu es un analyste expert en biais médiatiques. Analyse les articles fournis et détecte :
+- OMISSION : fait couvert par certaines sources, ignoré par d'autres
+- DIVERGENCE : même sujet traité avec angles radicalement opposés
+- INCOHÉRENCE : une source se contredit dans ses propres articles
+- SILENCE : sujet important ignoré par la quasi-totalité des sources
 
-const PROMPT_OMISSION_DIVERGENCE = `Tu es un analyste critique expert en biais médiatiques et en analyse comparative de la presse internationale.
+Retourne UNIQUEMENT un tableau JSON valide (sans markdown) de 10 à 12 analyses couvrant les 4 types et plusieurs catégories.
 
-On te fournit une liste d'articles récents de différentes sources médiatiques. Ton rôle est de détecter uniquement :
+Structure de chaque analyse :
+{"type":"OMISSION"|"DIVERGENCE"|"INCOHÉRENCE"|"SILENCE","category":"Géopolitique"|"Économie"|"Société"|"Climat"|"Justice","title":"max 15 mots","summary":"2-3 phrases","detail":"4-5 phrases avec exemples précis","sourceIds":["id"],"silentSourceIds":["id"],"severity":1|2|3,"isPriority":true|false,"sourceQuotes":[{"sourceId":"id","quote":"citation"}]}`;
 
-- OMISSION : un fait couvert par certaines sources et délibérément ignoré par d'autres
-- DIVERGENCE : des sources traitant le même sujet avec des angles ou conclusions radicalement opposés
-
-Retourne UNIQUEMENT un tableau JSON valide (sans markdown, sans texte autour) contenant entre 6 et 8 analyses de type OMISSION ou DIVERGENCE.
-Sois exhaustif : cherche des cas dans des domaines variés (géopolitique, économie, société, climat, justice).
-
-${BASE_SCHEMA}`;
-
-const PROMPT_INCOHERENCE_SILENCE = `Tu es un analyste critique expert en biais médiatiques et en analyse comparative de la presse internationale.
-
-On te fournit une liste d'articles récents de différentes sources médiatiques. Ton rôle est de détecter uniquement :
-
-- INCOHÉRENCE : une même source qui se contredit dans ses propres articles sur une même période
-- SILENCE : un sujet important (économique, social, géopolitique, climatique) ignoré par la quasi-totalité des sources francophones ou anglophones
-
-Retourne UNIQUEMENT un tableau JSON valide (sans markdown, sans texte autour) contenant entre 4 et 6 analyses de type INCOHÉRENCE ou SILENCE.
-Pour SILENCE, cherche des sujets couverts par seulement 1-2 sources sur 16 disponibles.
-
-${BASE_SCHEMA}`;
-
-function buildUserMessage(articles) {
-  const articleText = articles
-    .map(a => `[${a.source_id}] ${a.title}${a.content ? '\n' + a.content.slice(0, 300) : ''}`)
-    .join('\n---\n');
-  return `Sources disponibles: ${JSON.stringify(SOURCE_NAMES)}\n\nArticles du corpus:\n\n${articleText}`;
-}
-
-async function callGPT(systemPrompt, userMessage) {
-  const response = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage },
-    ],
-    temperature: 0.7,
-    max_tokens: 8000,
-  });
-
-  const raw = response.choices[0].message.content.trim();
-  const match = raw.match(/\[[\s\S]*\]/);
-  if (!match) throw new Error('No JSON array in GPT response');
-  return JSON.parse(match[0]);
+function hasAnalysisToday() {
+  const today = new Date().toISOString().split('T')[0];
+  const row = db.prepare(`SELECT COUNT(*) as cnt FROM press_items WHERE date = ?`).get(today);
+  return row.cnt > 0;
 }
 
 function insertAnalyses(analyses) {
@@ -106,11 +59,17 @@ function insertAnalyses(analyses) {
   return ids;
 }
 
-export async function analyzeArticles() {
-  // Use unprocessed first, fall back to recent articles from last 48h
-  let articles = getUnprocessedArticles(120);
+export async function analyzeArticles({ forceRefresh = false } = {}) {
+  // Skip if already analyzed today (unless forced)
+  if (!forceRefresh && hasAnalysisToday()) {
+    console.log('[Analyzer] Already analyzed today — skipping API call');
+    return [];
+  }
+
+  // Use unprocessed articles first, fall back to recent 48h
+  let articles = getUnprocessedArticles(100);
   if (articles.length < 6) {
-    articles = getRecentArticles(120);
+    articles = getRecentArticles(100);
   }
 
   if (articles.length < 6) {
@@ -118,27 +77,34 @@ export async function analyzeArticles() {
     return [];
   }
 
-  console.log(`[Analyzer] Analyzing ${articles.length} articles with GPT-4o-mini (2 parallel calls)...`);
+  console.log(`[Analyzer] Sending ${articles.length} articles to GPT-4o-mini...`);
 
-  const userMessage = buildUserMessage(articles);
+  const articleText = articles
+    .map(a => `[${a.source_id}] ${a.title}${a.content ? '\n' + a.content.slice(0, 150) : ''}`)
+    .join('\n---\n');
+
+  const userMessage = `Sources: ${JSON.stringify(SOURCE_NAMES)}\n\nArticles:\n\n${articleText}`;
 
   try {
-    // Run both analysis types in parallel
-    const [omDiv, incoSil] = await Promise.all([
-      callGPT(PROMPT_OMISSION_DIVERGENCE, userMessage).catch(err => {
-        console.error('[Analyzer] OMISSION/DIVERGENCE call failed:', err.message);
-        return [];
-      }),
-      callGPT(PROMPT_INCOHERENCE_SILENCE, userMessage).catch(err => {
-        console.error('[Analyzer] INCOHÉRENCE/SILENCE call failed:', err.message);
-        return [];
-      }),
-    ]);
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: 0.6,
+      max_tokens: 6000,
+    });
 
-    const allAnalyses = [...omDiv, ...incoSil];
-    const ids = insertAnalyses(allAnalyses);
+    const raw = response.choices[0].message.content.trim();
+    const match = raw.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('No JSON array in GPT response');
 
-    console.log(`[Analyzer] Inserted ${ids.length} press items (${omDiv.length} OMISSION/DIVERGENCE + ${incoSil.length} INCOHÉRENCE/SILENCE)`);
+    const analyses = JSON.parse(match[0]);
+    const ids = insertAnalyses(analyses);
+    markProcessed(articles.map(a => a.id));
+
+    console.log(`[Analyzer] Inserted ${ids.length} press items`);
     return ids;
   } catch (err) {
     console.error('[Analyzer] Error:', err.message);

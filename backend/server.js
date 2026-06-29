@@ -5,7 +5,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { getPressItems } from './analyzer.js';
 import { startScheduler, runNow } from './scheduler.js';
-import { resetAllProcessed } from './rss-fetcher.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -14,7 +13,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Serve built React app
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- API ---
@@ -28,11 +26,11 @@ app.get('/api/press-items', (_req, res) => {
   }
 });
 
-app.post('/api/analyze', async (_req, res) => {
+app.post('/api/analyze', async (req, res) => {
   try {
-    // Reset processed flag so all recent articles are re-analyzed fresh
-    resetAllProcessed();
-    const result = await runNow();
+    // forceRefresh=true uniquement si explicitement demandé (admin)
+    const forceRefresh = req.body?.forceRefresh === true;
+    const result = await runNow({ forceRefresh });
     res.json({ success: true, ...result });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -52,7 +50,6 @@ app.get('/api/status', (_req, res) => {
   }
 });
 
-// SPA fallback
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -60,10 +57,9 @@ app.get('*', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`[Server] Running on port ${PORT}`);
   startScheduler();
-  // First run if DB is empty
   const items = getPressItems(1);
   if (items.length === 0 && process.env.OPENAI_API_KEY) {
     console.log('[Server] No data yet — launching initial analysis...');
-    runNow().catch(console.error);
+    runNow({ forceRefresh: true }).catch(console.error);
   }
 });

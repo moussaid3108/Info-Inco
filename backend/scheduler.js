@@ -3,15 +3,15 @@ import { fetchAllSources } from './rss-fetcher.js';
 import { analyzeArticles } from './analyzer.js';
 
 export function startScheduler() {
-  // Every 6 hours: 00:00, 06:00, 12:00, 18:00
-  cron.schedule('0 */6 * * *', async () => {
-    console.log('[Scheduler] Starting scheduled run...');
+  // Every day at 07:00
+  cron.schedule('0 7 * * *', async () => {
+    console.log('[Scheduler] Starting daily run...');
     await fetchAllSources();
     await analyzeArticles();
-    console.log('[Scheduler] Scheduled run complete.');
+    console.log('[Scheduler] Daily run complete.');
   });
 
-  console.log('[Scheduler] Running every 6 hours');
+  console.log('[Scheduler] Running once a day at 07:00');
 }
 
 export async function runNow() {

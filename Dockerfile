@@ -12,7 +12,7 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 COPY backend/package*.json ./
-RUN npm ci --production
+RUN npm install --omit=dev
 
 RUN apk del python3 make g++
 

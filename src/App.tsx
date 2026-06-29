@@ -18,6 +18,7 @@ export default function App() {
   });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [pressItems, setPressItems] = useState<PressItem[]>([]);
+  const [revueKey, setRevueKey] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function App() {
   };
 
   const navigate = (p: Page) => { setPage(p); setSidebarOpen(false); };
+  const goHome = () => { setPage('revue'); setSidebarOpen(false); setRevueKey(k => k + 1); };
   const sharedProps = { pressItems, favorites, onToggleFavorite: toggleFavorite };
 
   return (
@@ -56,6 +58,7 @@ export default function App() {
       <Navbar
         onMenuToggle={() => setSidebarOpen(true)}
         onAnalyze={handleAnalyze}
+        onHome={goHome}
         isAnalyzing={isAnalyzing}
         currentPage={page}
       />
@@ -73,7 +76,7 @@ export default function App() {
           </div>
         ) : (
           <>
-            {page === 'revue' && <RevuePage {...sharedProps} />}
+            {page === 'revue' && <RevuePage key={revueKey} {...sharedProps} />}
             {page === 'sources' && <SourcesPage pressItems={pressItems} />}
             {page === 'confrontation' && <ConfrontationPage {...sharedProps} />}
             {page === 'favoris' && <FavorisPage {...sharedProps} />}

@@ -5,11 +5,12 @@ import clsx from 'clsx';
 interface Props {
   onMenuToggle: () => void;
   onAnalyze: () => void;
+  onHome: () => void;
   isAnalyzing: boolean;
   currentPage: Page;
 }
 
-export default function Navbar({ onMenuToggle, onAnalyze, isAnalyzing }: Props) {
+export default function Navbar({ onMenuToggle, onAnalyze, onHome, isAnalyzing }: Props) {
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm">
       <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
@@ -21,12 +22,12 @@ export default function Navbar({ onMenuToggle, onAnalyze, isAnalyzing }: Props) 
           <Menu size={20} className="text-gray-700" />
         </button>
 
-        <div className="flex items-center gap-2">
+        <button onClick={onHome} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
             <Zap size={16} className="text-white fill-white" />
           </div>
           <span className="font-bold text-gray-900 text-lg tracking-tight">Inco-Info</span>
-        </div>
+        </button>
 
         <button
           onClick={onAnalyze}

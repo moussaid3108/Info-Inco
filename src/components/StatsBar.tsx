@@ -14,19 +14,19 @@ export default function StatsBar({ pressItems }: Props) {
     <div className="grid grid-cols-4 gap-2 mb-4">
       <div className="bg-red-50 border border-red-100 rounded-xl p-2.5 text-center">
         <p className="text-xl font-bold text-red-600">{counts.OMISSION}</p>
-        <p className="text-[10px] font-semibold text-red-500 uppercase tracking-wide">Omissions</p>
+        <p className="text-[9px] font-semibold text-red-500 uppercase tracking-tight leading-tight">Omissions</p>
       </div>
       <div className="bg-amber-50 border border-amber-100 rounded-xl p-2.5 text-center">
         <p className="text-xl font-bold text-amber-600">{counts.DIVERGENCE}</p>
-        <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wide">Divergences</p>
+        <p className="text-[9px] font-semibold text-amber-500 uppercase tracking-tight leading-tight">Divergences</p>
       </div>
       <div className="bg-violet-50 border border-violet-100 rounded-xl p-2.5 text-center">
         <p className="text-xl font-bold text-violet-600">{counts.INCOHÉRENCE}</p>
-        <p className="text-[10px] font-semibold text-violet-500 uppercase tracking-wide">Incohérences</p>
+        <p className="text-[9px] font-semibold text-violet-500 uppercase tracking-tight leading-tight">Incohérences</p>
       </div>
       <div className="bg-gray-100 border border-gray-200 rounded-xl p-2.5 text-center">
         <p className="text-xl font-bold text-gray-600">{counts.SILENCE}</p>
-        <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Silences</p>
+        <p className="text-[9px] font-semibold text-gray-500 uppercase tracking-tight leading-tight">Silences</p>
       </div>
     </div>
   );

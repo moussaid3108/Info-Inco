@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { getUnprocessedArticles, getRecentArticles, markProcessed } from './rss-fetcher.js';
 import db from './database.js';
 import { randomUUID } from 'crypto';
+import { sendPushToAll } from './push.js';
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -126,6 +127,17 @@ export async function analyzeArticles({ forceRefresh = false } = {}) {
     markProcessed(articles.map(a => a.id));
 
     console.log(`[Analyzer] Inserted ${ids.length} press items`);
+
+    // Notification push si analyses prioritaires
+    const priorities = analyses.filter(a => a.isPriority);
+    if (priorities.length > 0) {
+      const first = priorities[0];
+      sendPushToAll(
+        `🚨 ${priorities.length} alerte${priorities.length > 1 ? 's' : ''} prioritaire${priorities.length > 1 ? 's' : ''}`,
+        first.title
+      ).catch(() => {});
+    }
+
     return ids;
   } catch (err) {
     console.error('[Analyzer] Error:', err.message);

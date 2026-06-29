@@ -3,9 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getPressItems, analyzeArticles } from './analyzer.js';
+import { getPressItems } from './analyzer.js';
 import db from './database.js';
 import { startScheduler, runNow } from './scheduler.js';
+import { vapidPublicKey } from './vapid.js';
+import { sendPushToAll } from './push.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -13,15 +15,13 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- API ---
 
 app.get('/api/press-items', (_req, res) => {
   try {
-    const items = getPressItems();
-    res.json(items);
+    res.json(getPressItems());
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -29,7 +29,6 @@ app.get('/api/press-items', (_req, res) => {
 
 app.post('/api/analyze', async (req, res) => {
   try {
-    // forceRefresh=true uniquement si explicitement demandé (admin)
     const forceRefresh = req.body?.forceRefresh === true;
     const result = await runNow({ forceRefresh });
     res.json({ success: true, ...result });
@@ -38,7 +37,6 @@ app.post('/api/analyze', async (req, res) => {
   }
 });
 
-// Nettoie les anciennes entrées et force une nouvelle analyse
 app.post('/api/refresh', async (_req, res) => {
   try {
     db.prepare(`DELETE FROM press_items WHERE date < date('now', '-7 days')`).run();
@@ -51,11 +49,7 @@ app.post('/api/refresh', async (_req, res) => {
 
 app.get('/api/sources', (_req, res) => {
   try {
-    const rows = db.prepare(`
-      SELECT source_id, COUNT(*) as count
-      FROM raw_articles
-      GROUP BY source_id
-    `).all();
+    const rows = db.prepare(`SELECT source_id, COUNT(*) as count FROM raw_articles GROUP BY source_id`).all();
     const counts = {};
     rows.forEach(r => { counts[r.source_id] = r.count; });
     res.json(counts);
@@ -67,11 +61,37 @@ app.get('/api/sources', (_req, res) => {
 app.get('/api/status', (_req, res) => {
   try {
     const items = getPressItems(1);
-    res.json({
-      status: 'ok',
-      hasData: items.length > 0,
-      lastDate: items[0]?.date || null,
-    });
+    res.json({ status: 'ok', hasData: items.length > 0, lastDate: items[0]?.date || null });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- Push Notifications ---
+
+app.get('/api/vapid-key', (_req, res) => {
+  res.json({ publicKey: vapidPublicKey });
+});
+
+app.post('/api/subscribe', (req, res) => {
+  try {
+    const sub = req.body;
+    if (!sub?.endpoint) return res.status(400).json({ error: 'Invalid subscription' });
+    db.prepare(`
+      INSERT OR REPLACE INTO push_subscriptions (endpoint, subscription)
+      VALUES (?, ?)
+    `).run(sub.endpoint, JSON.stringify(sub));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/subscribe', (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    if (endpoint) db.prepare(`DELETE FROM push_subscriptions WHERE endpoint = ?`).run(endpoint);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

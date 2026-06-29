@@ -1,5 +1,6 @@
 import { Menu, RefreshCw, Zap } from 'lucide-react';
 import { Page } from '../types';
+import NotificationBell from './NotificationBell';
 import clsx from 'clsx';
 
 interface Props {
@@ -28,6 +29,8 @@ export default function Navbar({ onMenuToggle, onAnalyze, onHome, isAnalyzing }:
           </div>
           <span className="font-bold text-gray-900 text-lg tracking-tight">Inco-Info</span>
         </button>
+
+        <NotificationBell />
 
         <button
           onClick={onAnalyze}

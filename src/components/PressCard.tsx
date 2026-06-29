@@ -31,15 +31,41 @@ function ShareButton({ item }: { item: PressItem }) {
 
   const shareText = `🔍 Inco-Info — ${item.type}\n\n${item.title}\n\n${item.summary}\n\nvia inco-info.fr`;
 
+  const copyFallback = () => {
+    try {
+      const el = document.createElement('textarea');
+      el.value = shareText;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
   const handleShare = async () => {
+    // Essayer le partage natif (mobile)
     if (navigator.share) {
       try {
         await navigator.share({ title: item.title, text: shareText });
-      } catch {}
-    } else {
+        return;
+      } catch (err: any) {
+        // AbortError = l'utilisateur a annulé, on ne fait rien
+        if (err?.name === 'AbortError') return;
+        // Autre erreur → fallback clipboard
+      }
+    }
+    // Fallback : copier dans le presse-papier
+    try {
       await navigator.clipboard.writeText(shareText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      copyFallback();
     }
   };
 
@@ -47,7 +73,7 @@ function ShareButton({ item }: { item: PressItem }) {
     <button
       onClick={handleShare}
       className="p-1.5 rounded-full text-gray-300 hover:text-gray-500 transition-all flex-shrink-0"
-      title="Partager"
+      title={copied ? 'Copié !' : 'Partager'}
     >
       {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
     </button>

@@ -78,7 +78,7 @@ function ConfrontationCard({ item, isFavorite, onToggleFavorite }: {
       </div>
 
       {/* Citations / analyse détaillée */}
-      {(item.sourceQuotes?.length > 0 || item.detail) && (
+      {((item.sourceQuotes && item.sourceQuotes.length > 0) || item.detail) && (
         <>
           <button
             onClick={() => setExpanded(!expanded)}
